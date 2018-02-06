@@ -13,6 +13,9 @@ contract Pausable is Ownable {
   event Unpause();
 
   bool public paused = false;
+  uint256 public startTime;
+  uint256 public endTime;
+  uint256 private pauseTime;
 
 
   /**
@@ -36,6 +39,11 @@ contract Pausable is Ownable {
    */
   function pause() onlyOwner whenNotPaused public {
     paused = true;
+    //Record the pausing time only if any startTime is defined
+    //in other cases, it will work as a toggle switch only
+    if(startTime > 0){
+        pauseTime = now;
+    }
     Pause();
   }
 
@@ -44,6 +52,11 @@ contract Pausable is Ownable {
    */
   function unpause() onlyOwner whenPaused public {
     paused = false;
+    //if endTime is defined, only then proceed with its updation
+    if(endTime > 0 && pauseTime > startTime){
+        uint256 pauseDuration = pauseTime - startTime;
+        endTime = endTime + pauseDuration;
+    }
     Unpause();
   }
 }
